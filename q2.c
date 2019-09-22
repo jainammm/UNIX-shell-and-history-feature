@@ -41,9 +41,9 @@ if (pid > 0) {
 
    char inverted[BUFFER_SIZE];
 
-close(fd1[READ_END]);
-write(fd1[WRITE_END], input, strlen(input)+1);
-close(fd1[WRITE_END]);
+        close(fd1[READ_END]);
+        write(fd1[WRITE_END], input, strlen(input)+1);
+        close(fd1[WRITE_END]);
        
 
         close(fd2[WRITE_END]);
