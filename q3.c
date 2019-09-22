@@ -5,15 +5,21 @@
 
 
 #define MAX_LINE 80 /* The maximum length command */
+
+#define BUFFER_SIZE 100
+
 int main(void)
 {
     char *args[MAX_LINE/2 + 1]; /* command line arguments */
     int should_run = 1; /* flag to determine when to exit program */
+    int count = 0;
+    char history[10][BUFFER_SIZE];
     while (should_run) {
         printf("\033[1;32m");       // Adding color
         printf("osh> ");
-        printf("\033[0m");
-        char commandStr[1000];
+        printf("\033[0m");          // Removing color
+
+        char commandStr[BUFFER_SIZE];
         scanf("%[^\n]%*c", commandStr);
 
         int i=0, ampersandCheck = 0;
@@ -37,6 +43,109 @@ int main(void)
             continue;
         }
 
+        if (strcmp(args[0], "history") == 0){
+            if(count>0){
+                printf("Shell command history:\n");
+                int k;
+                int j = 0;
+                int histCount = count;
+                
+                for (k = 0; k<10;k++)
+                {
+
+                    printf("%d.  ", histCount);
+                    while (history[k][j] != '\n' && history[k][j] != '\0')
+                    {	
+                        printf("%c", history[k][j]);
+                        j++;
+                    }
+                    printf("\n");
+                    j = 0;
+                    histCount--;
+                    if (histCount ==  0)
+                        break;
+                }
+		    }
+            else
+            {
+                printf("No Commands in the history!\n");
+            }
+
+            continue;
+        }
+
+        int prevExecuted = 0;
+        if(strcmp(args[0], "!!") == 0){
+            if(count > 0){
+                prevExecuted = 1;
+                strcpy(commandStr, history[0]);
+                token = strtok(commandStr, " "); 
+                i=0;
+                ampersandCheck=0;
+                while (token != NULL) {             
+                    if(strcmp(token, "&") == 0){
+                        ampersandCheck=1;
+                    }
+                    else{
+                        args[i++] = token;
+                    }
+
+                    token = strtok(NULL, " "); 
+
+                }
+                args[i] = NULL;
+            }
+            else{
+                printf("No recent command in the history!");
+                continue;
+            }
+        }
+
+        if(args[0][0] - '!' == 0){
+            int x = args[0][1]- '0'; 
+            int z = args[0][2]- '0'; 
+            if (x >= count){
+                printf("No such command!\n");
+                continue;
+            }
+
+            else if (z!=-48) {
+                printf("No Such Command in the history. Enter <=!9 (buffer size is 10 along with current command)\n");
+                continue;
+            }
+
+            prevExecuted = 1;
+            strcpy(commandStr, history[x]);
+            token = strtok(commandStr, " "); 
+            i=0;
+            ampersandCheck=0;
+            while (token != NULL) {             
+                if(strcmp(token, "&") == 0){
+                    ampersandCheck=1;
+                }
+                else{
+                    args[i++] = token;
+                }
+
+                token = strtok(NULL, " "); 
+
+            }
+            args[i] = NULL;
+
+        }
+
+        if(prevExecuted == 0){
+            for (i = 9;i>0; i--) //Moving the previous history 
+                strcpy(history[i], history[i-1]);
+
+            strcpy(history[0],commandStr); //Updating the history array with input buffer
+            
+            count++;
+            if(count>10){
+                count=10;
+            }
+        }
+        int status;
         int pid = fork();
 
         if(pid == 0){
@@ -44,7 +153,8 @@ int main(void)
         }
         else{
             if(ampersandCheck == 0){
-                wait(NULL);
+                while(wait(&status) != pid)
+                    ;
             }
         }
 
