@@ -20,12 +20,18 @@ int main(void)
         printf("\033[0m");          // Removing color
 
         char commandStr[BUFFER_SIZE];
-        scanf("%[^\n]%*c", commandStr);
+        fgets(commandStr, BUFFER_SIZE, stdin); 
+        // scanf("%[^\n]%*c", commandStr);
+        // printf("\n jainam %d", commandStr[0]);
 
         int i=0, ampersandCheck = 0;
         char* token = strtok(commandStr, " "); 
 
-        while (token != NULL) {             
+        while (token != NULL) {  
+            if(token[strlen(token)-1] - '\n' == 0){
+                token[strlen(token)-1] = '\0';
+            }
+
             if(strcmp(token, "&") == 0){
                 ampersandCheck=1;
             }
@@ -156,9 +162,7 @@ int main(void)
                 while(wait(&status) != pid)
                     ;
             }
-        }
-
-
+        } 
 
         fflush(stdin);
 
