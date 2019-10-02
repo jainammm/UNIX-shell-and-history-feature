@@ -149,7 +149,11 @@ int main(void)
             for (i = 9;i>0; i--) //Moving the previous history 
                 strcpy(history[i], history[i-1]);
 
-            strcpy(history[0],commandStr); //Updating the history array with input buffer
+            strcpy(history[0], "");
+            for(int i=0; args[i] != NULL; i++){
+                strcat(history[0], args[i]);
+                strcat(history[0], " ");
+            }
             
             count++;
             
